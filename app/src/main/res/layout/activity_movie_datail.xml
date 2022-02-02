@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".view.MovieDetailActivity">
+
+
+    
+     <ImageView
+         android:id="@+id/image_view_backdrop_poster"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         app:layout_constraintTop_toTopOf="parent"
+         />
+
+    <TextView
+        android:id="@+id/text_view_movie_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/image_view_backdrop_poster"
+        android:text="Matrix"
+        android:textSize="23sp"
+        android:textAlignment="center"
+        android:layout_marginTop="13dp"
+        />
+
+    <LinearLayout
+        android:id="@+id/linear_genre_release"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_movie_title">
+
+        <TextView
+            android:id="@+id/text_view_release_date"
+            android:layout_width="130dp"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textColor="#000000"
+            android:textSize="14sp"
+            tools:text="Estreia: 27/12/199" />
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/text_view_overview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:layout_margin="12dp"
+        app:layout_constraintTop_toBottomOf="@id/linear_genre_release"
+        android:text="pfianspodfkaodsdoasmdpmasdmapsmd"/>
+
+    <TextView
+        android:id="@+id/text_view_genre"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:textAlignment="center"
+        android:textColor="@color/design_default_color_primary_dark"
+        app:layout_constraintTop_toBottomOf="@id/text_view_overview"
+        android:textSize="16sp"
+        tools:text="Gêneros: Comédia" />
+
+
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
