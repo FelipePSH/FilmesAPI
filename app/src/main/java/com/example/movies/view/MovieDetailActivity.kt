@@ -1,6 +1,7 @@
 package com.example.movies.view
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -13,11 +14,13 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class MovieDetailActivity : AppCompatActivity() {
+    private var id: Int? = null
     private lateinit var mViewModel: DetailViewModel
     private lateinit var binding: ActivityMovieDatailBinding
-    private var mMovieId = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        Log.d("Teste Lipe", "onCreate")
 
         mViewModel = ViewModelProvider(this).get(DetailViewModel::class.java)
 
@@ -26,7 +29,12 @@ class MovieDetailActivity : AppCompatActivity() {
         setContentView(view)
 
         intent.extras?.let { bundle ->
-            mViewModel.getMovieDetail(bundle.getInt("KEY_MOVIE_ID"))
+
+            id = bundle.getInt("KEY_MOVIE_ID")
+            Log.d("Teste Lipe", "$id movie bundle")
+            mViewModel.getMovieDetail(id!!)
+
+
         }
 
 
@@ -59,9 +67,20 @@ class MovieDetailActivity : AppCompatActivity() {
 
             }
 
-        val mDateFormat: SimpleDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
-        val releaseData = SimpleDateFormat("yyyy-MM-dd").parse(listMovieDetail.releaseDate)
-        binding.textViewReleaseDate.text = "Estreia: " + mDateFormat.format(releaseData)
+
+        binding.textViewReleaseDate.text = parseRealese(listMovieDetail.releaseDate)
+
     }
 
+
+    fun parseRealese(receivedReleaseDate: String): String {
+
+        val mDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
+        val releaseDate = SimpleDateFormat("yyyy-MM-dd").parse(receivedReleaseDate)
+        return mDateFormat.format(releaseDate)
+
+    }
+
+
 }
+

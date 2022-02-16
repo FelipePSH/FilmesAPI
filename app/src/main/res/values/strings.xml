@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Movies</string>
+    <string name="estreia">Estreia:</string>
+    <string name="genres">Gêneros: </string>
 </resources>

@@ -13,4 +13,8 @@ class MovieConstants private constructor(){
     object URLs {
         const val IMAGE_URL = "https://image.tmdb.org/t/p/original/"
     }
+
+    object BUNDLE {
+        const val MOVIE_KEY_ID = "KEY_MOVIE_ID"
+    }
 }
