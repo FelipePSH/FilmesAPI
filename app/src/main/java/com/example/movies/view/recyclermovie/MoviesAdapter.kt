@@ -4,13 +4,13 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.movies.R
-import com.example.movies.service.model.MovieModelResponse
+import com.example.movies.service.model.MovieModel
 
 class MoviesAdapter(
     private val onClick: (Int) -> Unit
 ) : RecyclerView.Adapter<MoviesViewHolder>() {
 
-    private var mList: List<MovieModelResponse> = arrayListOf()
+    private var mList: List<MovieModel> = arrayListOf()
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MoviesViewHolder {
@@ -27,11 +27,10 @@ class MoviesAdapter(
         return mList.count()
     }
 
-    fun updateList(list: List<MovieModelResponse>) {
+    fun updateList(list: List<MovieModel>) {
         mList = list
         notifyDataSetChanged()
     }
-
 
 
 }

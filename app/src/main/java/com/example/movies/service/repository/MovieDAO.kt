@@ -4,22 +4,23 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.example.movies.service.model.MovieModelData
 import com.example.movies.service.model.MovieModelResponse
 
 @Dao
 interface MovieDAO {
 
     @Insert
-    fun save(movieResponse: MovieModelResponse)
+    fun save(movieData: MovieModelData)
 
     @Update
-    fun update(movieResponse: MovieModelResponse)
+    fun update(movieData: MovieModelData)
 
     @Query("SELECT * FROM Movie")
-    fun load() : List<MovieModelResponse>
+    fun load(): List<MovieModelData>
 
     @Query("SELECT * FROM Movie WHERE id = :id")
-    fun getMovie(id: Int) : MovieModelResponse
+    fun getMovie(id: Int): MovieModelData
 
 
 }
