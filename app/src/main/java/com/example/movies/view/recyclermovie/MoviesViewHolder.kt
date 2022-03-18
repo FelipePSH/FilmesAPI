@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.movies.databinding.RowMovieListBinding
 import com.example.movies.service.constants.MovieConstants
 import com.example.movies.service.model.MovieModel
@@ -25,7 +26,8 @@ class MoviesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val releaseData = SimpleDateFormat("yyyy-MM-dd").parse(movieResponse.releaseDate)
         textViewReleaseDate.text = mDateFormat.format(releaseData)
 
-        Glide.with(itemView.context).load(MovieConstants.URLs.IMAGE_URL + movieResponse.posterPath)
+        Glide.with(itemView.context).load(MovieConstants.URLs.IMAGE_URL + movieResponse.posterPath).diskCacheStrategy(
+            DiskCacheStrategy.ALL)
             .into(imageViewMoviePoster)
 
 

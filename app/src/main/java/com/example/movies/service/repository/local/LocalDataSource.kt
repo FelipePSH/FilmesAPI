@@ -1,31 +1,18 @@
 package com.example.movies.service.repository.local
 
-import android.content.Context
-import com.example.movies.service.model.MovieModelData
-import com.example.movies.service.model.MovieModelResponse
+import com.example.movies.service.entities.GenreEntity
+import com.example.movies.service.entities.MovieEntity
+import kotlinx.coroutines.flow.Flow
 
 
-class LocalDataSource(context: Context) {
-    private val mDataBase = MovieDataBase.getDatabase(context)
+interface LocalDataSource {
 
+    fun listMovies(): Flow<List<MovieEntity>>
 
-    fun listMovies( ): List<MovieModelData> {
-        return mDataBase.movieDAO().load()
-    }
+    suspend fun saveMovie(movieData: List<MovieEntity>)
 
-    fun getMovie(id: Int): MovieModelData {
-        return mDataBase.movieDAO().getMovie(id)
-    }
+    suspend fun saveGenre(genre: GenreEntity)
 
-    fun save(movieData: MovieModelData) {
-        TODO("Verificar como iremos salvar todos filmes, já que o que recebemos é uma lista de vário filmes")
-        mDataBase.movieDAO().save(movieData)
-    }
-
-    fun update(movieData: MovieModelData) {
-        TODO("Verificar como iremos atualizar todos filmes, já que o que recebemos é uma lista de vário filmes")
-        mDataBase.movieDAO().update(movieData)
-    }
-
+    suspend fun listGenres()
 
 }

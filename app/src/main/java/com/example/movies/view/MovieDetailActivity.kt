@@ -2,13 +2,16 @@ package com.example.movies.view
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.movies.databinding.ActivityMovieDatailBinding
 import com.example.movies.service.constants.MovieConstants
-import com.example.movies.service.model.MovieDetailModel
+import com.example.movies.service.model.MovieDetailModelResponse
+import com.example.movies.service.repository.remote.RemoteDataSource
 import com.example.movies.viewmodel.DetailViewModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -43,32 +46,54 @@ class MovieDetailActivity : AppCompatActivity() {
     }
 
     private fun observe() {
-        mViewModel.movieDetailList.observe(this, Observer { ListMovieDetail ->
-            if (ListMovieDetail != null){
-                onReceiveList(ListMovieDetail)
+        mViewModel.movieDetailListResponse.observe(this, Observer { ListMovieDetail ->
+            when(ListMovieDetail){
+                RemoteDataSource.MovieDetailState.MovieDetailError -> {
+                    Toast.makeText(this,"erro", Toast.LENGTH_SHORT)
+                }
+                RemoteDataSource.MovieDetailState.MovieDetailLoading -> {
+                    Toast.makeText(this,"loading", Toast.LENGTH_SHORT)
+                }
+                is RemoteDataSource.MovieDetailState.MovieDetailSuccess ->{
+                    onReceiveList(ListMovieDetail.movieDetailModelResponse)
+                }
+                else -> {
+                    Toast.makeText(this,"erro inesperado", Toast.LENGTH_SHORT)
+                }
             }
+
+
         })
 
     }
 
-    private fun onReceiveList(listMovieDetail: MovieDetailModel) {
-        binding.textViewMovieTitle.text = listMovieDetail.title
-        binding.textViewOverview.text = listMovieDetail.overview
+    private fun onReceiveList(listMovieDetailResponse: MovieDetailModelResponse) {
+        binding.textViewMovieTitle.text = listMovieDetailResponse.title
+        binding.textViewOverview.text = listMovieDetailResponse.overview
 
         val separator = ", "
-        binding.textViewGenre.text = "Gêneros: " + listMovieDetail.convetGenreToStringList().joinToString(separator)
+        binding.textViewGenre.text =
+            "Gêneros: " + listMovieDetailResponse.convertGenreToStringList()?.joinToString(separator)
 
-        if (!listMovieDetail.backdropPath.isNullOrEmpty()){
-        Glide.with(this).load(MovieConstants.URLs.IMAGE_URL + listMovieDetail.backdropPath)
-            .into(binding.imageViewBackdropPoster)
+        if (!listMovieDetailResponse.backdropPath.isNullOrEmpty()) {
+            Glide.with(this)
+                .load(MovieConstants.URLs.IMAGE_URL + listMovieDetailResponse.backdropPath)
+                .diskCacheStrategy(
+                    DiskCacheStrategy.ALL
+                )
+                .into(binding.imageViewBackdropPoster)
         } else {
-            Glide.with(this).load(MovieConstants.URLs.IMAGE_URL + listMovieDetail.posterPath)
+            Glide.with(this)
+                .load(MovieConstants.URLs.IMAGE_URL + listMovieDetailResponse.posterPath)
+                .diskCacheStrategy(
+                    DiskCacheStrategy.ALL
+                )
                 .into(binding.imageViewBackdropPoster)
 
-            }
+        }
 
 
-        binding.textViewReleaseDate.text = parseRealese(listMovieDetail.releaseDate)
+        binding.textViewReleaseDate.text = parseRealese(listMovieDetailResponse.releaseDate)
 
     }
 

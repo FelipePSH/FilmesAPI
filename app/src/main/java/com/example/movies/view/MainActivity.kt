@@ -2,7 +2,6 @@ package com.example.movies.view
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.SearchView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -23,7 +22,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Log.d("Teste Lipe", "OnCreate")
+
 
         mViewModel = ViewModelProvider(this).get(MoviesViewModel::class.java)
 
@@ -40,34 +39,29 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-
+        mViewModel.start()
 
         binding.recyclerMovie.layoutManager = LinearLayoutManager(this)
         binding.recyclerMovie.adapter = mAdapter
 
-
-
         observe()
-
-
 
     }
 
     override fun onStart() {
         super.onStart()
-        mViewModel.listMovies()
-        Log.d("Teste Lipe", "OnStart")
+
+
     }
 
     override fun onRestart() {
         super.onRestart()
-        Log.d("Teste Lipe", "onRestart")
+
     }
 
     override fun onResume() {
         super.onResume()
-        Log.d("Teste Lipe", "OnResume")
-        mViewModel.listMovies()
+
 
         binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
             androidx.appcompat.widget.SearchView.OnQueryTextListener {
@@ -108,7 +102,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        Log.d("Teste Lipe", "onSaveInstanceState")
 
 
     }
@@ -116,34 +109,34 @@ class MainActivity : AppCompatActivity() {
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        Log.d("Teste Lipe", "onRestoreInstanceState")
+
     }
 
     override fun onPause() {
         super.onPause()
-        Log.d("Teste Lipe", "onPause")
+
     }
 
     override fun onStop() {
         super.onStop()
-        Log.d("Teste Lipe", "onStop")
+
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d("Teste Lipe", "onDestroy")
+
     }
 
     private fun observe() {
         mViewModel.moviesList.observe(this, Observer { listMovieModel ->
-            Log.d("Teste Lipe", "Movies List observe")
+
             if (listMovieModel != null) {
                 mAdapter.updateList(listMovieModel)
             }
         })
 
         mViewModel.moviesSearchResult.observe(this, Observer {
-            Log.d("Teste Lipe", "observe moviesSearchResult")
+
             if (it != null) {
                 mAdapter.updateList(it)
             }

@@ -4,14 +4,13 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.example.movies.service.model.MovieDetailModel
+import com.example.movies.service.entities.MovieEntity
 import com.example.movies.service.model.MovieModel
 import com.example.movies.service.model.MovieModelResponse
-import com.example.movies.service.model.MoviesResponse
-import com.example.movies.service.repository.local.LocalDataSource
+import com.example.movies.service.repository.local.LocalDataSourceImpl
 import com.example.movies.service.repository.remote.RemoteDataSource
 import com.example.movies.util.NetworkChecker
-import javax.xml.transform.Transformer
+import kotlinx.coroutines.flow.Flow
 
 
 //NAO FAZ UMA REQUISIÇÃO
@@ -19,22 +18,21 @@ import javax.xml.transform.Transformer
 
 class MovieRepository(val context: Context) {
 
-    private val mRemoteDataSource = RemoteDataSource()
-    private val mLocalDataSource = LocalDataSource(context)
+    private val mRemoteDataSource = RemoteDataSource(context)
+    private val mLocalDataSource = LocalDataSourceImpl(context)
 
     @RequiresApi(Build.VERSION_CODES.M)
     val networkChecker = NetworkChecker(context.getSystemService(ConnectivityManager::class.java))
 
 
-    fun listMovies(listener : APIListener<List<MovieModelResponse>>){
-        if (networkChecker.hasInternet())  {
-            mRemoteDataSource.listMovies(listener)
+    fun listMovies(): Flow<List<MovieEntity>> {
+        return mLocalDataSource.listMovies()
+    }
 
-        } else {
 
-            mLocalDataSource.listMovies()
-
-        }
+    suspend fun saveMovies() {
+        //salvar e carregar
+        mRemoteDataSource.saveMovies()
     }
 
     fun searchMovie(
@@ -52,19 +50,16 @@ class MovieRepository(val context: Context) {
 
     }
 
-    fun getDetail(
-        id: Int,
-        onSuccess: (MovieDetailModel) -> Unit,
-        onFaiure: (String) -> Unit
-    ) {
-
-        if (networkChecker.hasInternet()) {
-            mRemoteDataSource.getDetail(id, onSuccess, onFaiure)
-        } else {
-            return
-        }
-
-
+    suspend fun saveMovies(movieModelData: List<MovieEntity>) {
+        mLocalDataSource.saveMovie(movieModelData)
     }
+}
 
+
+sealed class ListState {
+    data class Error(val message: String) : ListState()
+
+    data class Loaded(val listMovies: List<MovieModel>) : ListState()
+
+    object Loading : ListState()
 }

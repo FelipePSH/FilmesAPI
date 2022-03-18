@@ -1,20 +1,20 @@
 package com.example.movies.viewmodel
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.*
 import com.example.movies.service.model.MovieModel
-import com.example.movies.service.model.MovieModelResponse
-import com.example.movies.service.repository.APIListener
 import com.example.movies.service.repository.MovieRepository
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 
 class MoviesViewModel(application: Application) : AndroidViewModel(application) {
 
     private val mMoviesList = MutableLiveData<List<MovieModel>>()
     val moviesList: LiveData<List<MovieModel>> = mMoviesList
 
-    private val mErrorMessage = MutableLiveData<String>()
+    private var mErrorMessage = MutableLiveData<String>()
     val erroMessage: LiveData<String> = mErrorMessage
 
     private val mMoviesSearchResult = MutableLiveData<List<MovieModel>>()
@@ -22,28 +22,28 @@ class MoviesViewModel(application: Application) : AndroidViewModel(application) 
 
     private val mMovieRepository = MovieRepository(application)
 
-    fun listMovies() {
-        mMovieRepository.listMovies(object : APIListener<List<MovieModelResponse>> {
-            override fun onSuccess(result: List<MovieModelResponse>, statusCode: Int) {
-                val movieModelList = result.map { movieModelResponse ->
-                    MovieModel(
-                        id = movieModelResponse.id,
-                        title = movieModelResponse.title,
-                        posterPath = movieModelResponse.posterPath,
-                        releaseDate = movieModelResponse.releaseDate
-                    )
+    private fun listMovies() {
+        viewModelScope.launch {
+            mMovieRepository.listMovies()
+                .onStart {
+                    println("LIPE começou o flow")
+                }.catch {
+                    println("LIPE deu erro")
                 }
-                mMoviesList.value = movieModelList
+                .collect {
+                    val listMovies = it.map { movie ->
+                        MovieModel(
+                            id = movie.id,
+                            title = movie.title,
+                            releaseDate = movie.releaseDate,
+                            posterPath = movie.posterPath
 
+                        )
+                    }
 
-            }
-
-            override fun onFailure(message: String) {
-                TODO("Not yet implemented")
-            }
-
-        })
-
+                    mMoviesList.postValue(listMovies)
+                }
+        }
     }
 
 
@@ -64,5 +64,20 @@ class MoviesViewModel(application: Application) : AndroidViewModel(application) 
         })
     }
 
+    private fun getMovies() {
+        viewModelScope.launch {
+            mMovieRepository.saveMovies()
+        }
+    }
+
+    fun start(){
+        listMovies()
+        getMovies()
+    }
+
+
 
 }
+
+
+
