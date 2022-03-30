@@ -18,7 +18,7 @@ interface MovieService {
     suspend fun getDetail(@Path(value = "movie_id", encoded = true) id: Int) : Response<MovieDetailModelResponse>
 
     @GET("search/movie")
-    fun searchMovie(@Query("query", encoded = true) query: String) : Call<MoviesResponse>
+    suspend fun searchMovie(@Query("query", encoded = true) query: String) : Response<MoviesResponse>
 
 
     @GET("genre/movie/list")

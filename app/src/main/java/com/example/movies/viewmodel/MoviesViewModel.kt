@@ -1,15 +1,24 @@
 package com.example.movies.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.movies.service.model.MovieModel
 import com.example.movies.service.repository.MovieRepository
+import com.example.movies.service.repository.remote.RemoteDataSource
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MoviesViewModel(application: Application) : AndroidViewModel(application) {
+@HiltViewModel
+class MoviesViewModel @Inject constructor(
+    private val movieRepository: MovieRepository,
+    private val remoteDataSource: RemoteDataSource
+) : ViewModel() {
 
     private val mMoviesList = MutableLiveData<List<MovieModel>>()
     val moviesList: LiveData<List<MovieModel>> = mMoviesList
@@ -17,14 +26,12 @@ class MoviesViewModel(application: Application) : AndroidViewModel(application) 
     private var mErrorMessage = MutableLiveData<String>()
     val erroMessage: LiveData<String> = mErrorMessage
 
-    private val mMoviesSearchResult = MutableLiveData<List<MovieModel>>()
-    val moviesSearchResult: LiveData<List<MovieModel>> = mMoviesSearchResult
+    private var mMovieListSearchResult = MutableLiveData<RemoteDataSource.MovieDetailState>()
+    val movieListSearchResult: LiveData<RemoteDataSource.MovieDetailState> = mMovieListSearchResult
 
-    private val mMovieRepository = MovieRepository(application)
-
-    private fun listMovies() {
+    fun listMovies() {
         viewModelScope.launch {
-            mMovieRepository.listMovies()
+            movieRepository.listMovies()
                 .onStart {
                     println("LIPE começou o flow")
                 }.catch {
@@ -46,36 +53,25 @@ class MoviesViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-
     fun searchMovies(movieName: String) {
-        mMovieRepository.searchMovie(movieName, { listMovieModelResponseOrData ->
-
-            val movieModel = listMovieModelResponseOrData.map { movieModelResponse ->
-                MovieModel(
-                    id = movieModelResponse.id,
-                    title = movieModelResponse.title,
-                    posterPath = movieModelResponse.posterPath,
-                    releaseDate = movieModelResponse.releaseDate
-                )
-            }
-            mMoviesSearchResult.value = movieModel
-        }, { errorMessage ->
-            mErrorMessage.value = errorMessage
-        })
+        viewModelScope.launch {
+            remoteDataSource.searchMovie(movieName)
+                .collect {
+                    mMovieListSearchResult.postValue(it)
+                }
+        }
     }
 
     private fun getMovies() {
         viewModelScope.launch {
-            mMovieRepository.saveMovies()
+            movieRepository.saveMovies()
         }
     }
 
-    fun start(){
+    fun start() {
         listMovies()
         getMovies()
     }
-
-
 
 }
 

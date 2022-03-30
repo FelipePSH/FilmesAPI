@@ -5,24 +5,23 @@ import android.os.Bundle
 import android.widget.SearchView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.movies.databinding.ActivityMainBinding
 import com.example.movies.service.constants.MovieConstants
+import com.example.movies.service.repository.remote.RemoteDataSource
 import com.example.movies.view.recyclermovie.MoviesAdapter
 import com.example.movies.viewmodel.MoviesViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-    private var id: Int? = null
     private lateinit var mViewModel: MoviesViewModel
     private lateinit var binding: ActivityMainBinding
     lateinit var mAdapter: MoviesAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
 
         mViewModel = ViewModelProvider(this).get(MoviesViewModel::class.java)
 
@@ -45,17 +44,6 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerMovie.adapter = mAdapter
 
         observe()
-
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-
-    }
-
-    override fun onRestart() {
-        super.onRestart()
 
     }
 
@@ -100,47 +88,42 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
 
 
-    }
-
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-    }
-
-    override fun onStop() {
-        super.onStop()
-
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-    }
 
     private fun observe() {
-        mViewModel.moviesList.observe(this, Observer { listMovieModel ->
+        mViewModel.moviesList.observe(this, { listMovieModel ->
 
             if (listMovieModel != null) {
                 mAdapter.updateList(listMovieModel)
             }
         })
 
-        mViewModel.moviesSearchResult.observe(this, Observer {
-
-            if (it != null) {
-                mAdapter.updateList(it)
-            }
+        mViewModel.movieListSearchResult.observe(this, { listMovieSearchResult ->
+            useCase(listMovieSearchResult)
         })
+    }
+
+    fun useCase(listMovieSearchResult: RemoteDataSource.MovieDetailState?) {
+        testUseCase()
+//        when (listMovieSearchResult) {
+//            RemoteDataSource.MovieState.MovieError -> {
+//                Toast.makeText(this, "erro", Toast.LENGTH_SHORT).show()
+//            }
+//            RemoteDataSource.MovieState.MovieLoading -> {
+//                Toast.makeText(this, "loading", Toast.LENGTH_SHORT).show()
+//            }
+//            is RemoteDataSource.MovieState.MovieSuccess -> {
+//                mAdapter.updateList(listMovieSearchResult.movieDetailModel!!)
+//            }
+//            else -> {
+//                Toast.makeText(this, "erro inesperado", Toast.LENGTH_SHORT).show()
+//            }
+//        }
+    }
+
+    fun testUseCase(){
+
     }
 
 }

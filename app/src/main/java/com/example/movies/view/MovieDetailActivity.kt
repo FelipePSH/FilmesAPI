@@ -13,9 +13,11 @@ import com.example.movies.service.constants.MovieConstants
 import com.example.movies.service.model.MovieDetailModelResponse
 import com.example.movies.service.repository.remote.RemoteDataSource
 import com.example.movies.viewmodel.DetailViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.*
 
+@AndroidEntryPoint
 class MovieDetailActivity : AppCompatActivity() {
     private var id: Int? = null
     private lateinit var mViewModel: DetailViewModel
@@ -37,28 +39,25 @@ class MovieDetailActivity : AppCompatActivity() {
             Log.d("Teste Lipe", "$id movie bundle")
             mViewModel.getMovieDetail(id!!)
 
-
         }
-
-
 
         observe()
     }
 
     private fun observe() {
         mViewModel.movieDetailListResponse.observe(this, Observer { ListMovieDetail ->
-            when(ListMovieDetail){
-                RemoteDataSource.MovieDetailState.MovieDetailError -> {
-                    Toast.makeText(this,"erro", Toast.LENGTH_SHORT)
+            when (ListMovieDetail) {
+                RemoteDataSource.MovieState.MovieError -> {
+                    Toast.makeText(this, "erro", Toast.LENGTH_SHORT)
                 }
-                RemoteDataSource.MovieDetailState.MovieDetailLoading -> {
-                    Toast.makeText(this,"loading", Toast.LENGTH_SHORT)
+                RemoteDataSource.MovieState.MovieLoading -> {
+                    Toast.makeText(this, "loading", Toast.LENGTH_SHORT)
                 }
-                is RemoteDataSource.MovieDetailState.MovieDetailSuccess ->{
+                is RemoteDataSource.MovieDetailState.MovieDetailSuccess -> {
                     onReceiveList(ListMovieDetail.movieDetailModelResponse)
                 }
                 else -> {
-                    Toast.makeText(this,"erro inesperado", Toast.LENGTH_SHORT)
+                    Toast.makeText(this, "erro inesperado", Toast.LENGTH_SHORT)
                 }
             }
 
@@ -73,7 +72,8 @@ class MovieDetailActivity : AppCompatActivity() {
 
         val separator = ", "
         binding.textViewGenre.text =
-            "Gêneros: " + listMovieDetailResponse.convertGenreToStringList()?.joinToString(separator)
+            "Gêneros: " + listMovieDetailResponse.convertGenreToStringList()
+                ?.joinToString(separator)
 
         if (!listMovieDetailResponse.backdropPath.isNullOrEmpty()) {
             Glide.with(this)

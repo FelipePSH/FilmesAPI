@@ -10,7 +10,9 @@ import com.example.movies.service.repository.MovieDAO
 @Database(entities = [MovieEntity::class], version = 1)
 abstract class MovieDataBase : RoomDatabase() {
 
+
     abstract fun movieDAO() : MovieDAO
+
     companion object {
 
         private lateinit var dbInstance: MovieDataBase

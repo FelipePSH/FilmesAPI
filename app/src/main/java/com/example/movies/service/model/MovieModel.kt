@@ -11,7 +11,7 @@ data class MovieModel (
     val releaseDate: String,
 
 
-    val posterPath: String?
+    val posterPath: String?,
 
 
 )

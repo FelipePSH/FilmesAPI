@@ -1,32 +1,25 @@
 package com.example.movies.service.repository.remote
 
-import android.content.Context
-import android.util.Log
 import com.example.movies.service.entities.MovieEntity
 import com.example.movies.service.model.GenreResponseModel
 import com.example.movies.service.model.MovieDetailModelResponse
-import com.example.movies.service.model.MovieModelResponse
-import com.example.movies.service.model.MoviesResponse
+import com.example.movies.service.model.MovieModel
 import com.example.movies.service.repository.APIListener
-import com.example.movies.service.repository.local.LocalDataSourceImpl
-import com.example.movies.service.repository.remote.reporitory.RetrofitClient
-import kotlinx.coroutines.flow.Flow
+import com.example.movies.service.repository.local.LocalDataSource
 import kotlinx.coroutines.flow.flow
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.lang.Exception
+import javax.inject.Inject
 
-class RemoteDataSource(context: Context) {
+class RemoteDataSource @Inject constructor(
+    private val movieService: MovieService,
+    private val localDataSource: LocalDataSource
+) {
 
-    private val mRemote = RetrofitClient.createService(MovieService::class.java)
-    private val mLocalDataSource = LocalDataSourceImpl(context)
-
-
-    suspend fun saveMovies(){
+    suspend fun saveMovies() {
         try {
-           val response = mRemote.listMovies()
-
+            val response = movieService.listMovies()
             val movieEntity = response.results?.map {
                 MovieEntity(
                     id = it.id,
@@ -37,52 +30,47 @@ class RemoteDataSource(context: Context) {
                 )
             }
 
-            mLocalDataSource.saveMovie(movieEntity!!)
 
-        } catch (e : Exception) {
+            localDataSource.saveMovie(movieEntity!!)
+
+        } catch (e: Exception) {
             println("LIPE ${e.message}")
         }
     }
 
-
     suspend fun getDetail(id: Int) = flow {
-        val response = mRemote.getDetail(id)
-            if (response.isSuccessful) {
-                emit(response.body()?.let { MovieDetailState.MovieDetailSuccess(it) })
-            } else {
-                emit(MovieDetailState.MovieDetailError)
-            }
-
+        val response = movieService.getDetail(id)
+        if (response.isSuccessful) {
+            emit(response.body()?.let { MovieDetailState.MovieDetailSuccess(it) })
+        } else {
+            emit(MovieDetailState.MovieDetailError)
+        }
     }
 
-    fun searchMovie(
+    suspend fun searchMovie(
         movieName: String,
-        onSuccess: (List<MovieModelResponse>) -> Unit,
-        onFaiure: (String) -> Unit
-    ) {
-        val call: Call<MoviesResponse> = mRemote.searchMovie(movieName)
-        call.enqueue(object : Callback<MoviesResponse> {
-            override fun onFailure(call: Call<MoviesResponse>, t: Throwable) {
-                t.message
-            }
-
-            override fun onResponse(
-                call: Call<MoviesResponse>,
-                response: Response<MoviesResponse>
-            ) {
-                if (response.isSuccessful) {
-                    response.body()?.results?.let { onSuccess.invoke(it) }
-                } else {
-                    onFaiure.invoke(response.errorBody().toString())
+    ) = flow {
+        val response = movieService.searchMovie(movieName)
+        if (response.isSuccessful) {
+            emit(response.body().let {
+                it?.results?.let { listmoviemodelresponse ->
+                    MovieState.MovieSuccess(listmoviemodelresponse.map {
+                        MovieModel(
+                            id = it.id,
+                            title = it.title,
+                            releaseDate = it.releaseDate,
+                            posterPath = it.posterPath
+                        )
+                    })
                 }
-            }
-        })
+            })
+        } else {
+            emit(MovieState.MovieError)
+        }
     }
 
-
-
-    fun getGenres(listener : APIListener<List<GenreResponseModel>>){
-        val call: Call<List<GenreResponseModel>> = mRemote.getGenres()
+    fun getGenres(listener: APIListener<List<GenreResponseModel>>) {
+        val call: Call<List<GenreResponseModel>> = movieService.getGenres()
         call.enqueue(object : Callback<List<GenreResponseModel>> {
             override fun onResponse(
                 call: Call<List<GenreResponseModel>>,
@@ -104,11 +92,20 @@ class RemoteDataSource(context: Context) {
         })
     }
 
-    sealed interface MovieDetailState{
-        data class MovieDetailSuccess(val movieDetailModelResponse: MovieDetailModelResponse) : MovieDetailState
+    sealed interface MovieDetailState {
+        data class MovieDetailSuccess(val movieDetailModelResponse: MovieDetailModelResponse) :
+            MovieDetailState
+
         object MovieDetailError : MovieDetailState
         object MovieDetailLoading : MovieDetailState
     }
+
+    sealed interface MovieState {
+        data class MovieSuccess(val movieDetailModel: List<MovieModel>) : MovieDetailState
+        object MovieError : MovieDetailState
+        object MovieLoading : MovieDetailState
+    }
+
 }
 
 
